@@ -27,17 +27,21 @@ classdef EuphonicSFTest < matlab.unittest.TestCase
     properties (TestParameter)
         use_c = {false, true, true};
         n_threads = {int32(1), int32(1), int32(2)};
-        chunk = {2, missing, missing};
+        chunk = {5, missing, missing};
     end
 
     methods (TestClassSetup)
         function setQpts(testCase, temp, materials, dw_grid, bose, ...
                          negative_e, conversion_mat, lim)
-            qpts = [0.0, 0.0, 0.0;
-                    0.1, 0.2, 0.3;
-                    0.4, 0.5, 0.0;
-                    0.6, 0.0, 0.7;
-                    0.0, 0.8, 0.9];
+            qpts = [ 0.0,  0.0,  0.0;
+                     0.1,  0.2,  0.3;
+                     0.4,  0.5,  0.0;
+                     0.6,  0.0,  0.7;
+                     0.0,  0.8,  0.9;
+                    -0.5,  0.0,  0.0;
+                     0.0, -0.5,  0.0;
+                     0.0,  0.0, -0.5;
+                     1.0, -1.0, -1.0];
             scattering_lengths = struct('La', 8.24, 'Zr', 7.16, 'O', 5.803, ...
                                         'Si', 4.1491, 'Na', 3.63, 'Cl', 9.577);
             scale = 1.0;
@@ -77,12 +81,24 @@ classdef EuphonicSFTest < matlab.unittest.TestCase
             if ~ismissing(chunk)
                 opts = [opts {'chunk', chunk}];
             end
-            fname = get_expected_output_filename(testCase.material_name, ...
-                                                 pars, opts);
 
             [w, sf] = euphonic_sf(qpts(:, 1), qpts(:, 2), qpts(:, 3), ...
                                   pars, testCase.scattering_lengths, opts);
-            disp(fname);
+            w_mat = cell2mat(w);
+            sf_mat = cell2mat(sf);
+
+            fname = get_expected_output_filename(testCase.material_name, ...
+                                                 pars, opts);
+            load(fname, 'expected_w', 'expected_sf');
+            expected_w_mat = cell2mat(expected_w);
+            expected_sf_mat = cell2mat(expected_sf);
+
+            testCase.verifyTrue( ...
+                all(ismembertol(w_mat, expected_w_mat, 1e-5), 'all'));
+            % Ignore acoustic structure factors with (:, 3:end) - their
+            % values can be unstable at small frequencies
+            testCase.verifyTrue( ...
+                all(ismembertol(sf_mat(:, 3:end), expected_sf_mat(:, 3:end), 1e-5), 'all'));
         end
     end
 
@@ -96,12 +112,12 @@ classdef EuphonicSFTest < matlab.unittest.TestCase
             pars = testCase.pars;
             phonon_kwargs = {'phonon_kwargs', {'asr', 'reciprocal'}};
             opts = [opts phonon_kwargs];
-            [w, sf] = euphonic_sf(qpts(:,1), qpts(:,2), qpts(:,3), ...
-                                  testCase.pars, testCase.scattering_lengths, ...
-                                  opts)
+            [expected_w, expected_sf] = euphonic_sf( ...
+               qpts(:,1), qpts(:,2), qpts(:,3), ...
+               testCase.pars, testCase.scattering_lengths, opts);
             fname = get_expected_output_filename(testCase.material_name, ...
                                                  pars, opts);
-            save(get_abspath(fname, 'expected_output'), 'w', 'sf');
+            save(fname, 'expected_w', 'expected_sf');
         end
     end
 end

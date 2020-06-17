@@ -32,5 +32,6 @@ function fname = get_expected_output_filename(material_name, pars, opts)
     fname = strrep(fname, '-', 'm');
 
     fname = char(strjoin(fname, ''));
+    fname = get_abspath(fname, 'expected_output');
 end
 
