@@ -95,10 +95,21 @@ classdef EuphonicSFTest < matlab.unittest.TestCase
 
             testCase.verifyTrue( ...
                 all(ismembertol(w_mat, expected_w_mat, 1e-5), 'all'));
-            % Ignore acoustic structure factors with (:, 3:end) - their
+            % Ignore acoustic structure factors by setting to zero - their
             % values can be unstable at small frequencies
+            sf_mat(:, 1:3) = 0;
+            expected_sf_mat(:, 1:3) = 0;
+            idx = find(strcmp('negative_e', opts));
+            if length(idx) == 1 && opts{idx + 1} == true
+                n = size(sf_mat, 2)/2;
+                sf_mat(:, n+1:n+3) = 0;
+                expected_sf_mat(:, n+1:n+3) = 0;
+            end
+            % Need to sum over degenerate modes to compare structure factors
+            sf_summed = sum_degenerate_modes(w_mat, sf_mat);
+            expected_sf_summed = sum_degenerate_modes(w_mat, expected_sf_mat);
             testCase.verifyTrue( ...
-                all(ismembertol(sf_mat(:, 3:end), expected_sf_mat(:, 3:end), 1e-5), 'all'));
+                all(ismembertol(sf_summed, expected_sf_summed, 1e-2), 'all'));
         end
     end
 
