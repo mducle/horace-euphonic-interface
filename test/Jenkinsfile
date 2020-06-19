@@ -78,7 +78,6 @@ pipeline {
                 script {
                     if (isUnix()) {
                         sh """
-                            module load matlab/\$MATLAB_VERSION &&
                             module load conda/3 &&
                             module load gcc &&
                             export CC=gcc
@@ -86,9 +85,8 @@ pipeline {
                             conda create --name py python=3.6.0 -y &&
                             conda activate py &&
                             python -m pip install --upgrade --user pip &&
-                            python -m pip install numpy
+                            python -m pip install numpy &&
                             python -m pip install euphonic
-                            which python
                         """
                     }
                 }
@@ -98,8 +96,10 @@ pipeline {
         stage("Test") {
             steps {
                 sh """
-            cd test &&
-            matlab -nosplash - nodesktop -wait -batch "runtests('EuphonicTest.m', 'Tag', 'integration')"
+                    module load matlab/\$MATLAB_VERSION &&
+                    module load conda/3 &&
+                    cd test &&
+                    matlab -nosplash - nodesktop -wait -batch "runtests('EuphonicTest.m', 'Tag', 'integration')"
                 """
             }
         }
