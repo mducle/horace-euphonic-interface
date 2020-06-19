@@ -54,7 +54,7 @@ pipeline {
              silentResponse: false,
 
              regexpFilterText: '$ref',
-             regexpFilterExpression: 'refs/head/' + env.JOB_BASE_NAME
+             regexpFilterExpression: 'refs/head/' + env.GIT_BRANCH
         )
         pollSCM('')
     }
@@ -62,10 +62,15 @@ pipeline {
     stages {
 
         stage("Notify") {
-            steps {
-                setGitHubBuildStatus("pending", "Starting", "Linux")
-                echo "Branch: ${env.JOB_BASE_NAME}"
-            }
+	    steps {
+                script {
+		    if (env.AGENT == 'sl7') {
+                        setGitHubBuildStatus("pending", "Starting", "Linux")
+                    } else if (!isUnix()){
+                        checkout scm
+		    }
+                }
+	    }
         }
 
         stage("Set up") {
@@ -91,7 +96,6 @@ pipeline {
                             python -m pip install numpy
                             python -m pip install euphonic[phonopy_reader]
                         """
-		     //stuff
 		    }
                 }
             }
@@ -110,9 +114,8 @@ pipeline {
 		    } else {
                         bat """
                             CALL conda activate py
-			    "C:\\Programming\\Matlab\${MATLAB_VERSION}\\bin\\matlab.exe" -nosplash -nodesktop -wait -batch "run('run_tests.m')"
+			    "C:\\Programming\\Matlab%MATLAB_VERSION%\\bin\\matlab.exe" -nosplash -nodesktop -wait -batch "run('run_tests.m')"
                         """
-		    //stuff
 		    }
                 }
             }
