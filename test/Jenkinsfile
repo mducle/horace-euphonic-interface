@@ -161,20 +161,20 @@ pipeline {
         unsuccessful {
 	    script {
                 if (env.AGENT == 'sl7') {
-                    script {
-                        setGitHubBuildStatus("failure", "Unsuccessful", "Linux")
-			if (isUnix()) {
-                            def email = getGitCommitAuthorEmail()
-			} else {
-                            def email = getGitCommitAuthorEmailWindows()
-			}
-                        mail (
-                            to: "$email",
-                            subject: "Linux failed pipeline: ${env.JOB_BASE_NAME}",
-                            body: "See ${env.BUILD_URL}"
-                        )
-                    }
+                    setGitHubBuildStatus("failure", "Unsuccessful", "Linux")
                 }
+	    }
+            script {
+	        if (isUnix()) {
+                    def email = getGitCommitAuthorEmail()
+	        } else {
+                    def email = getGitCommitAuthorEmailWindows()
+	        }
+                mail (
+                    to: "$email",
+                    subject: "Linux failed pipeline: ${env.JOB_BASE_NAME}",
+                    body: "See ${env.BUILD_URL}"
+                )
 	    }
         }
 
