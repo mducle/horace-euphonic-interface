@@ -114,6 +114,7 @@ pipeline {
 		    } else {
                         bat """
                             CALL conda activate py
+			    cd test
 			    "C:\\Programming\\Matlab%MATLAB_VERSION%\\bin\\matlab.exe" -nosplash -nodesktop -wait -batch "run('run_tests.m')"
                         """
 		    }
