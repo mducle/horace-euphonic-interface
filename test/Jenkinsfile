@@ -83,19 +83,38 @@ pipeline {
                             python -m pip install numpy &&
                             python -m pip install euphonic[phonopy_reader]
                         """
-                    }
+                    } else {
+                        bat """
+                            CALL conda create --name py python=3.6.0 -y
+                            CALL conda activate py
+                            python -m pip install --upgrade --user pip
+                            python -m pip install numpy
+                            python -m pip install euphonic[phonopy_reader]
+                        """
+		     //stuff
+		    }
                 }
             }
         }
 
         stage("Test") {
             steps {
-                sh """
-                    module load matlab/\$MATLAB_VERSION &&
-                    module load conda/3 &&
-                    cd test &&
-                    matlab -nosplash -nodesktop -batch "run('run_tests.m')"
-                """
+	        script {
+		    if (isUnix()) {
+                        sh """
+                            module load matlab/\$MATLAB_VERSION &&
+                            module load conda/3 &&
+                            cd test &&
+                            matlab -nosplash -nodesktop -batch "run('run_tests.m')"
+                        """
+		    } else {
+                        bat """
+                            CALL conda activate py
+			    "C:\\Programming\\Matlab\${MATLAB_VERSION}\\bin\\matlab.exe" -nosplash -nodesktop -wait -batch "run('run_tests.m')"
+                        """
+		    //stuff
+		    }
+                }
             }
         }
     }
