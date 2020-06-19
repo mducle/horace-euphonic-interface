@@ -3,4 +3,3 @@ passed = [res.Passed];
 if ~all(passed)
     quit(1);
 end
-quit(1);
