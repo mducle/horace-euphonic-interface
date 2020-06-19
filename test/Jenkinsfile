@@ -86,7 +86,7 @@ pipeline {
                             conda activate py &&
                             python -m pip install --upgrade --user pip &&
                             python -m pip install numpy &&
-                            python -m pip install euphonic
+                            python -m pip install euphonic[phonopy_reader]
                         """
                     }
                 }
