@@ -13,7 +13,7 @@ def setGitHubBuildStatus(String status, String message, String context) {
                     "target_url": "$BUILD_URL", \
                     "context": "jenkins/${context}" \
                 }' \
-                ${env.GIT_URL}/statuses/${env.GIT_COMMIT}
+                https://api.github.com/repos/pace-neutrons/horace-euphonic-interface/statuses/${env.GIT_COMMIT}
             """
         }
     }
@@ -24,14 +24,9 @@ def getGitCommitAuthorEmail() {
             variable: 'api_token')]) {
         return sh(
             script: """
-                commit_url="\$(\\
-                    curl -s -H "Authorization: token ${api_token}" \\
-                    --request GET ${env.GIT_URL}/git/ref/heads/${env.JOB_BASE_NAME} \\
-                    | jq ".object.url" | tr -d '"'\\
-                )" &&
                 echo "\$(\\
                     curl -s -H "Authorization: token ${api_token}" \\
-                    --request GET \$commit_url |  jq '.author.email' | tr -d '"'\\
+                    --request GET https://api.github.com/repos/pace-neutrons/horace-euphonic-interface/git/commits/${env.GIT_COMMIT} |  jq '.author.email' | tr -d '"'\\
                 )"
             """,
             returnStdout: true
@@ -99,7 +94,7 @@ pipeline {
                     module load matlab/\$MATLAB_VERSION &&
                     module load conda/3 &&
                     cd test &&
-                    matlab -nosplash - nodesktop -wait -batch "run('run_tests.m')"
+                    matlab -nosplash -nodesktop -batch "run('run_tests.m')"
                 """
             }
         }
