@@ -99,7 +99,7 @@ pipeline {
                     module load matlab/\$MATLAB_VERSION &&
                     module load conda/3 &&
                     cd test &&
-                    matlab -nosplash - nodesktop -wait -batch "runtests('EuphonicTest.m', 'Tag', 'integration')"
+                    matlab -nosplash - nodesktop -wait -batch "run('run_tests.m')"
                 """
             }
         }
