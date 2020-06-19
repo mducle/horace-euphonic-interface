@@ -13,7 +13,7 @@ def setGitHubBuildStatus(String status, String message, String context) {
                     "target_url": "$BUILD_URL", \
                     "context": "jenkins/${context}" \
                 }' \
-                https://api.github.com/repos/pace-neutrons/horace-euphonic-interface/statuses/${env.GIT_COMMIT}
+                ${env.GIT_URL}/statuses/${env.GIT_COMMIT}
             """
         }
     }
@@ -26,7 +26,7 @@ def getGitCommitAuthorEmail() {
             script: """
                 commit_url="\$(\\
                     curl -s -H "Authorization: token ${api_token}" \\
-                    --request GET https://api.github.com/repos/pace-neutrons/horace-euphonic-interface/git/ref/heads/${env.JOB_BASE_NAME} \\
+                    --request GET ${env.GIT_URL}/git/ref/heads/${env.JOB_BASE_NAME} \\
                     | jq ".object.url" | tr -d '"'\\
                 )" &&
                 echo "\$(\\
